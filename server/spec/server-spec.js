@@ -13,6 +13,10 @@ describe('Persistent Node Chat Server', () => {
     database: 'chat',
   });
 
+  const username = 'Greg';
+  const message = 'In mercy\'s name, three days is all I need.';
+  const roomname = 'Test';
+
   beforeAll((done) => {
     dbConnection.connect();
 
@@ -21,7 +25,7 @@ describe('Persistent Node Chat Server', () => {
     /* Empty the db table before all tests so that multiple tests
      * (or repeated runs of the tests)  will not fail when they should be passing
      * or vice versa */
-    dbConnection.query(`truncate ${tablename}`, done);
+    // dbConnection.query(`truncate ${tablename}`, done);
   }, 6500);
 
   afterAll(() => {
@@ -29,9 +33,6 @@ describe('Persistent Node Chat Server', () => {
   });
 
   it('Should insert posted messages to the DB', (done) => {
-    const username = 'Valjean';
-    const message = 'In mercy\'s name, three days is all I need.';
-    const roomname = 'Hello';
     // Create a user on the chat server database.
     axios.post(`${API_URL}/users`, { username })
       .then(() => {
@@ -51,9 +52,8 @@ describe('Persistent Node Chat Server', () => {
             throw err;
           }
           // Should have one result:
-          console.log('HELLO_________________');
-          expect(results.length).toEqual(1);
-
+          expect(results.length).toBeGreaterThan(0);
+          // console.log('00000000000000000000000000000000', results[3]);
           // TODO: If you don't have a column named text, change this test.
           expect(results[0].message).toEqual(message);
           done();
@@ -66,7 +66,7 @@ describe('Persistent Node Chat Server', () => {
 
   it('Should output all messages from the DB', (done) => {
     // Let's insert a message into the db
-    const queryString = '';
+    const queryString = 'SELECT * from messages';
     const queryArgs = [];
     /* TODO: The exact query string and query args to use here
      * depend on the schema you design, so I'll leave them up to you. */
@@ -79,7 +79,9 @@ describe('Persistent Node Chat Server', () => {
       axios.get(`${API_URL}/messages`)
         .then((response) => {
           const messageLog = response.data;
-          expect(messageLog[0].text).toEqual(message);
+          console.log('---------------------------------', messageLog);
+          expect(messageLog[0].message).toEqual(message);
+          // expect(messageLog[0].roomname).toEqual(1);
           expect(messageLog[0].roomname).toEqual(roomname);
           done();
         })
